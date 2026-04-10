@@ -52,8 +52,13 @@ jobs:
           script: |
             set -e
 
-            echo "Pulling image from ECR..."
+            echo "Logging into ECR from EC2 using GitHub token..."
 
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+            sudo docker login --username AWS --password-stdin \
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+            echo "Pulling latest image..."
             sudo docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
 
             echo "Stopping old container..."
