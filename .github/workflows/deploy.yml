@@ -50,14 +50,14 @@ jobs:
           script: |
             set -e
 
-            echo "Logging into AWS ECR..."
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+            echo "Pulling image from ECR..."
 
-            echo "Pulling latest image..."
-            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/php-demo:latest
+            sudo docker pull <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/php-demo:latest
 
-            echo "Restarting container..."
-            docker stop php-app || true
-            docker rm php-app || true
+            echo "Stopping old container..."
+            sudo docker stop php-app || true
+            sudo docker rm php-app || true
 
-            docker run -d -p 80:80 --name php-app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/php-demo:latest
+            echo "Starting new container..."
+            sudo docker run -d -p 80:80 --name php-app \
+              <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/php-demo:latest
