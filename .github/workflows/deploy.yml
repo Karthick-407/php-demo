@@ -50,23 +50,14 @@ jobs:
           script: |
             set -e
 
-            echo "Installing Docker if not exists..."
-            sudo apt update -y
-            sudo apt install docker.io -y
-            sudo systemctl enable docker
-            sudo systemctl start docker
-
             echo "Logging into AWS ECR..."
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
-            sudo docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
             echo "Pulling latest image..."
-            sudo docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/php-demo:latest
 
-            echo "Stopping old container..."
-            sudo docker stop php-app || true
-            sudo docker rm php-app || true
+            echo "Restarting container..."
+            docker stop php-app || true
+            docker rm php-app || true
 
-            echo "Running new container..."
-            sudo docker run -d -p 80:80 --name php-app \
-              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+            docker run -d -p 80:80 --name php-app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/php-demo:latest
